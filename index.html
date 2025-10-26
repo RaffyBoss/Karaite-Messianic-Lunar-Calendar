@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karaite Messianic Calendar</title>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+
+  <style>
+    /* 1. Global Reset & Font */
+    :root {
+      --color-bg: #0d1117;         /* Dark background */
+      --color-bg-secondary: #161b22; /* Lighter background for cards */
+      --color-border: #30363d;       /* Borders */
+      --color-text: #c9d1d9;         /* Main text */
+      --color-text-secondary: #8b949e; /* Lighter text */
+      --color-primary: #58a6ff;     /* Blue for highlights/buttons */
+      --color-primary-hover: #79c0ff; /* Lighter blue for hover */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    h1, h2, h3 {
+      font-weight: 400;
+      color: var(--color-text);
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 2em;
+      text-align: center;
+      border: none;
+      margin-bottom: 10px;
+      color: var(--color-primary);
+    }
+    
+    h2 {
+        font-size: 1.5em;
+        margin-top: 40px;
+    }
+    
+    h3 {
+        font-size: 1.2em;
+        border-bottom: none;
+        color: var(--color-primary);
+        margin-bottom: 15px;
+    }
+    
+    p {
+        margin-bottom: 15px;
+        color: var(--color-text-secondary);
+    }
+    
+    label {
+        font-weight: 600;
+        margin-right: 5px;
+    }
+
+    /* 2. Live Visuals Section */
+    #live-visuals {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--color-bg-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0 40px 0;
+      gap: 25px;
+    }
+    
+    #moon-canvas {
+      width: 100px; /* Made the moon bigger */
+      height: 100px;
+      border-radius: 50%;
+      cursor: grab;
+      border: 1px solid var(--color-border);
+    }
+    #moon-canvas:active { cursor: grabbing; }
+
+    #live-info {
+        text-align: left;
+    }
+    #live-info h3 {
+      font-size: 1.25em;
+      color: var(--color-text);
+      margin: 0 0 8px 0;
+    }
+    #live-info p {
+      font-size: 1em;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    /* 3. Calendar Controls Section */
+    #calendar-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* Responsive grid */
+      gap: 20px;
+    }
+    
+    #calendar-controls p { /* The instructions */
+        grid-column: 1 / -1; /* Make it span the full width */
+        background-color: #21262d;
+        border: 1px solid var(--color-border);
+        padding: 15px;
+        border-radius: 6px;
+    }
+
+    .month-entry {
+      background-color: var(--color-bg-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .month-entry .expected-date {
+      font-style: italic;
+      color: var(--color-text-secondary);
+      margin-bottom: 0;
+    }
+
+    /* 4. Form Inputs & Button */
+    input[type="date"],
+    input[type="number"] {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 1em;
+      width: 100%; /* Make inputs fill the space */
+    }
+    
+    input[type="number"] {
+        width: 80px; /* Except for the month number */
+    }
+
+    button {
+      background-color: var(--color-primary);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 1em;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: var(--color-primary-hover);
+      color: #0d1117;
+    }
+
+    /* 5. Feast Day List Section */
+    #feast-day-list {
+      margin-top: 20px;
+    }
+    
+    #feast-day-list > div { /* The container for each month's feasts */
+        background-color: var(--color-bg-secondary);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    #feast-day-list ul {
+        list-style: none;
+        padding-left: 0;
+    }
+    
+    #feast-day-list li {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--color-border);
+    }
+    
+    #feast-day-list li:last-child {
+        border-bottom: none;
+    }
+    
+    #feast-day-list li strong {
+        color: var(--color-text);
+        margin-right: 8px;
+    }
+    
+    #feast-day-list li em {
+        color: var(--color-text-secondary);
+        font-size: 0.9em;
+        display: block; /* Puts description on its own line */
+        margin-top: 4px;
+    }
+  </style>
+
+</head>
+<body>
+
+  <div class="container">
+    <h1>Karaite Messianic Lunar Calendar</h1>
+    
+    <div id="live-visuals">
+      <div id="moon-phase-container">
+        <canvas id="moon-canvas"></canvas>
+      </div>
+      <div id="live-info">
+        <h3 id="moon-phase-text">Loading Moon...</h3>
+        <p id="sun-zodiac-text">Loading Sun Position...</p>
+      </div>
+    </div>
+    
+    <h2>Annual Predictions & Confirmations</h2>
+    
+    <div id="calendar-controls">
+      </div>
+    
+    <h2>Calculated Feast Days</h2>
+    <div id="feast-day-list">
+      </div>
+  </div>
+
+  <script src="suncalc.js"></script>
+  <script src="main.js" type="module"></script>
+
+</body>
+</html>
